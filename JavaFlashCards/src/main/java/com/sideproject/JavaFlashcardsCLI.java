@@ -34,11 +34,15 @@ public class JavaFlashcardsCLI {
             System.out.println();
             if (selection == 1) {
                 viewFlashCards();
+               promptUserAfterListOfTermsDisplayed();
             }else if (selection == 2) {
                 FlashCard flashCard = getRandomFlashCard();
                 displayFlashcard(flashCard);
                 promptUserToHitEnterForDefinition();
                 displayDefinition(flashCard);
+            }else if (selection == 3) {
+                viewFlashcardBySearch();
+                promptUserAfterListOfTermsDisplayed();
             }
         }
     }
@@ -60,9 +64,10 @@ public class JavaFlashcardsCLI {
         System.out.println();
         System.out.println("1. View All Java FlashCards");
         System.out.println("2. View A Random FlashCard");
-        System.out.println("3. Modify An Existing FlashCard");
-        System.out.println("4. Add A FlashCard");
-        System.out.println("5. Exit");
+        System.out.println("3. Search for a Term");
+        System.out.println("4. Modify An Existing FlashCard");
+        System.out.println("5. Add A FlashCard");
+        System.out.println("6. Exit");
     }
 
     private int promptForInt (String prompt) {
@@ -90,20 +95,38 @@ public class JavaFlashcardsCLI {
         System.out.println(message);
     }
 
-    // viewFlashCards method will need fixed to display ID with flashcard as opposed to
-    // count.  This could cause issues if more flashcards are added and ID and count become unsynced.
     private void viewFlashCards() {
         System.out.println("The following flashcards are available: ");
+
+        List<FlashCard> flashcards = flashCardDao.getAllFlashcards();
         try {
-            int count = 1;
-            for (String flashCard: flashCardDao.getAllFlashcards()) {
-                System.out.println(count + ": " + flashCard);
-                count ++;
+
+            for (FlashCard flashCard: flashCardDao.getAllFlashcards()) {
+                System.out.println(flashCard.getFlashCardId() + ": " + flashCard.getTerm());
             }
         }catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Unable to connect to server or database.");
         }
+    }
 
+    private void viewFlashcardBySearch() {
+        System.out.println("Please enter the name or partial name of the term you're looking for: ");
+        String input = userInput.nextLine();
+        System.out.println();
+        System.out.println("The following Flashcards appear in your search:");
+
+        try {
+            List<FlashCard> flashCards = flashCardDao.getFlashCardByPartialNameSearch(input);
+                if (flashCards.isEmpty()) {
+                    System.out.println("No Flashcards available");
+                    displayMenu();
+                }
+                for (FlashCard flashCard : flashCards) {
+                    System.out.println(flashCard.getFlashCardId() + ": " + flashCard.getTerm());
+            }
+        } catch (CannotGetJdbcConnectionException e) {
+            throw new DaoException("Cannot connect to server or database.");
+        }
     }
 
     private FlashCard getRandomFlashCard() {
@@ -127,18 +150,26 @@ public class JavaFlashcardsCLI {
 
     private void displayDefinition(FlashCard flashCard) {
         if (flashCard != null) {
-            System.out.println("Definition: " + flashCard.getDefinition());
+            System.out.println("Term: " + flashCard.getTerm() + " --- Definition: " + flashCard.getDefinition());
         } else {
             System.out.println("Definition is null");
         }
     }
 
     private void promptUserToHitEnterForDefinition() {
+        System.out.println();
         System.out.println("Press enter to view definition.");
         userInput.nextLine();
     }
 
-
+    private void promptUserAfterListOfTermsDisplayed() {
+        System.out.println();
+        int id = promptForInt("Please select the id of the term you'd like to view: ");
+        FlashCard flashCard = flashCardDao.getFlashCardById(id);
+        displayFlashcard(flashCard);
+        promptUserToHitEnterForDefinition();
+        displayDefinition(flashCard);
+    }
 
 
 

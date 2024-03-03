@@ -6,7 +6,7 @@ public interface FlashCardDao {
 
     FlashCard getFlashCardById(int flashCardId);
 
-    List<String> getAllFlashcards();
+    List<FlashCard> getAllFlashcards();
 
     FlashCard getRandomFlashcard();
 

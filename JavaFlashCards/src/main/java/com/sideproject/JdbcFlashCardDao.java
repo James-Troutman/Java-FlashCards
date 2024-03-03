@@ -35,13 +35,13 @@ public class JdbcFlashCardDao implements FlashCardDao{
     }
 
     @Override
-    public List<String> getAllFlashcards() {
-        List<String> flashcardTerms = new ArrayList<>();
-        String sql = "Select flashcard_id, term from flashcard order by flashcard_id asc;";
+    public List<FlashCard> getAllFlashcards() {
+        List<FlashCard> flashcardTerms = new ArrayList<>();
+        String sql = "Select * from flashcard order by flashcard_id asc;";
         try {
             SqlRowSet results = jdbcTemplate.queryForRowSet(sql);
             while (results.next()) {
-                flashcardTerms.add(results.getString("term"));
+                flashcardTerms.add(mapRowToFlashcard(results));
             }
         } catch (CannotGetJdbcConnectionException e) {
             throw new DaoException("Unable to connect to server or database.");
@@ -69,10 +69,10 @@ public class JdbcFlashCardDao implements FlashCardDao{
     @Override
     public List<FlashCard> getFlashCardByPartialNameSearch(String term) {
         List<FlashCard> flashCardTerms = new ArrayList<>();
-        String sql = "SELECT flashcard_id, term from flashcard where term ilike '%?%;";
+        String sql = "SELECT * from flashcard where term ilike ?;";
 
         try {
-            SqlRowSet results = jdbcTemplate.queryForRowSet(sql, term);
+            SqlRowSet results = jdbcTemplate.queryForRowSet(sql, "%" + term + "%");
             while (results.next()) {
                 flashCardTerms.add(mapRowToFlashcard(results));
             }

@@ -1,1 +1,1 @@
-A ClI application to be used as a study guide for key Java terms and concepts
+A ClI application to be used as a study guide for key Java terms and concepts.  Created a SQL database with 100+ foundational Java terms and principles.  Used JdbcTemplate to query the database to create a CLI application where users can look generate random terms and principle, then prompt application for the definition when ready.  Users can also perform a partial name search and view entire list of database items.

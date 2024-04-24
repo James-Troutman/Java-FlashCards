@@ -17,7 +17,7 @@ public class JavaFlashcardsCLI {
 
     public static void main(String[] args) {
         BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setUrl("jdbc:postgresql://localhost:5432/JavaFlashcards");
+        dataSource.setUrl("jdbc:postgresql://localhost:5432/Java_FlashCards");
         dataSource.setUsername("postgres");
         dataSource.setPassword("postgres1");
 
@@ -43,6 +43,9 @@ public class JavaFlashcardsCLI {
             }else if (selection == 3) {
                 viewFlashcardBySearch();
                 promptUserAfterListOfTermsDisplayed();
+            }else if (selection == 4) {
+                viewFlashCards();
+                promptUserToModifyThisFlashcard();
             }
         }
     }
@@ -151,6 +154,8 @@ public class JavaFlashcardsCLI {
     private void displayDefinition(FlashCard flashCard) {
         if (flashCard != null) {
             System.out.println("Term: " + flashCard.getTerm() + " --- Definition: " + flashCard.getDefinition());
+            System.out.println();
+            promptUserToContinue();
         } else {
             System.out.println("Definition is null");
         }
@@ -164,13 +169,58 @@ public class JavaFlashcardsCLI {
 
     private void promptUserAfterListOfTermsDisplayed() {
         System.out.println();
-        int id = promptForInt("Please select the id of the term you'd like to view: ");
+        int id = promptForInt("Please select the number of the term you'd like to view: ");
         FlashCard flashCard = flashCardDao.getFlashCardById(id);
         displayFlashcard(flashCard);
         promptUserToHitEnterForDefinition();
         displayDefinition(flashCard);
     }
 
+    private void promptUserToModifyThisFlashcard() {
+        System.out.println();
+        int id = promptForInt("Please select the number of the term you'd like to view: ");
+        FlashCard flashCard = flashCardDao.getFlashCardById(id);
+        displayFlashcard(flashCard);
+        System.out.println();
+        System.out.println("Modify this FlashCard? (y) or (n)");
+        System.out.println();
+        String userInputResponse = userInput.nextLine();
+        if (userInputResponse.equalsIgnoreCase("y")) {
+            updateFlashcard(flashCard);
+        }else if (userInputResponse.equalsIgnoreCase("n")) {
+            displayMenu();
+        } else {
+            System.out.println("Please enter (y) or (n)");
+        }
+    }
 
+    private void updateFlashcard(FlashCard flashCardToUpdate) {
+        String newCard = promptForString("New Flashcard Name (enter to leave unchanged): ");
+        if (!newCard.isBlank()) {
+            flashCardToUpdate.setTerm(newCard);
+        }
+        String newDefinition = promptForString("New Definition (enter to leave unchanged): ");
+        if (!newDefinition.isBlank()) {
+            flashCardToUpdate.setDefinition(newDefinition);
+        }
+        try {
+            FlashCard updatedFlashcard = flashCardDao.updateFlashcard(flashCardToUpdate);
+            System.out.println("---Updated---: " + updatedFlashcard.getTerm() + " -- " + updatedFlashcard.getDefinition());
+            System.out.println();
+            promptUserToContinue();
+        }catch (DaoException e) {
+            displayError("Error occured: " + e.getMessage());
+        }
 
+    }
+    private void promptUserToContinue() {
+        System.out.println("Press enter to continue...");
+        userInput.nextLine();
+    }
+
+    private String promptForString(String prompt) {
+        System.out.println(prompt);
+        return userInput.nextLine();
+
+    }
 }

@@ -106,7 +106,7 @@ public class JdbcFlashCardDao implements FlashCardDao{
         FlashCard updatedFlashCard = null;
         String sql = "Update flashcard set term = ?, definition = ? where flashcard_id = ?;";
         try {
-            int numberOfRows = jdbcTemplate.update(sql, flashCard.getTerm(), flashCard.getDefinition());
+            int numberOfRows = jdbcTemplate.update(sql, flashCard.getTerm(), flashCard.getDefinition(), flashCard.getFlashCardId());
 
             if (numberOfRows == 0) {
                 throw new DaoException("Zero rows affected, expect at least one.");

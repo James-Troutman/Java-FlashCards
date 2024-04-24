@@ -16,6 +16,7 @@ public interface FlashCardDao {
 
 
     FlashCard updateFlashcard(FlashCard flashCard);
+    int deleteFlashcardById(int flashcardId);
 
 
 

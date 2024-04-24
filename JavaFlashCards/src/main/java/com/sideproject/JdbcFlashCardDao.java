@@ -121,6 +121,20 @@ public class JdbcFlashCardDao implements FlashCardDao{
         return updatedFlashCard;
     }
 
+    public int deleteFlashcardById(int flashcardId) {
+        int numberOfRowsDeleted = 0;
+        String sql = "delete from flashcard where flashcard_id = ?;";
+
+        try {
+            numberOfRowsDeleted = jdbcTemplate.update(sql, flashcardId);
+        } catch (CannotGetJdbcConnectionException e) {
+            throw new DaoException("Unable to access server or database", e);
+        } catch (DataIntegrityViolationException e) {
+            throw new DaoException("Data Integrity Violation", e);
+        }
+        return numberOfRowsDeleted;
+    }
+
     private FlashCard mapRowToFlashcard(SqlRowSet rowSet) {
         FlashCard flashCard = new FlashCard();
         flashCard.setFlashCardId(rowSet.getInt("flashcard_id"));

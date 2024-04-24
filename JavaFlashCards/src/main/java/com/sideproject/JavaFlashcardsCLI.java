@@ -46,6 +46,16 @@ public class JavaFlashcardsCLI {
             }else if (selection == 4) {
                 viewFlashCards();
                 promptUserToModifyThisFlashcard();
+            }else if (selection == 5) {
+                addFlashcard();
+            }else if (selection == 6) {
+                viewFlashCards();
+                promptUserToDeleteThisFlashcard();
+            }else if (selection == 7) {
+                    running = false;
+                System.out.println("Exiting the program...");
+            }else {
+                System.out.println("Please enter a valid selection");
             }
         }
     }
@@ -67,10 +77,11 @@ public class JavaFlashcardsCLI {
         System.out.println();
         System.out.println("1. View All Java FlashCards");
         System.out.println("2. View A Random FlashCard");
-        System.out.println("3. Search for a Term");
+        System.out.println("3. Search For A Term");
         System.out.println("4. Modify An Existing FlashCard");
         System.out.println("5. Add A FlashCard");
-        System.out.println("6. Exit");
+        System.out.println("6. Delete A FlashCard");
+        System.out.println("7. Exit The Program");
     }
 
     private int promptForInt (String prompt) {
@@ -178,7 +189,7 @@ public class JavaFlashcardsCLI {
 
     private void promptUserToModifyThisFlashcard() {
         System.out.println();
-        int id = promptForInt("Please select the number of the term you'd like to view: ");
+        int id = promptForInt("Please select the number of the term you'd like to modify: ");
         FlashCard flashCard = flashCardDao.getFlashCardById(id);
         displayFlashcard(flashCard);
         System.out.println();
@@ -191,6 +202,37 @@ public class JavaFlashcardsCLI {
             displayMenu();
         } else {
             System.out.println("Please enter (y) or (n)");
+        }
+    }
+
+    private void promptUserToDeleteThisFlashcard() {
+        System.out.println();
+        int id = promptForInt("Please select the number of the term you'd like to delete");
+        FlashCard flashCard = flashCardDao.getFlashCardById(id);
+        displayFlashcard(flashCard);
+        System.out.println();
+        System.out.println("Are you sure you want to delete this flashcard? (y) or (n)");
+        System.out.println();
+        String userInputResponse = userInput.nextLine();
+        if (userInputResponse.equalsIgnoreCase("y")) {
+            deleteFlashcard(flashCard);
+        }else if (userInputResponse.equalsIgnoreCase("n")) {
+            displayMenu();
+        }else {
+            System.out.println("Please enter (y) or (n)");
+        }
+    }
+
+    private void deleteFlashcard(FlashCard flashcardToDelete) {
+        try {
+            int deletedRows = flashCardDao.deleteFlashcardById(flashcardToDelete.getFlashCardId());
+            if (deletedRows == 0) {
+                displayError("No records deleted");
+            }else {
+                System.out.println("Deleted" + flashcardToDelete.getTerm());
+            }
+        } catch (DaoException e) {
+            displayError("Error occurred: " + e.getMessage());
         }
     }
 
@@ -208,11 +250,42 @@ public class JavaFlashcardsCLI {
             System.out.println("---Updated---: " + updatedFlashcard.getTerm() + " -- " + updatedFlashcard.getDefinition());
             System.out.println();
             promptUserToContinue();
-        }catch (DaoException e) {
+        } catch (DaoException e) {
             displayError("Error occured: " + e.getMessage());
         }
-
     }
+        private void addFlashcard() {
+            FlashCard newFlashcard = promptForNewFlashcardData();
+
+            try {
+                newFlashcard = flashCardDao.create(newFlashcard);
+                System.out.println("--Added the following to the database");
+                System.out.println(newFlashcard.getTerm() + ": " + newFlashcard.getDefinition());
+                System.out.println();
+                promptUserToContinue();
+            } catch (DaoException e) {
+                displayError("Error occurred: " + e.getMessage());
+            }
+        }
+
+        private FlashCard promptForNewFlashcardData() {
+            FlashCard flashCard = new FlashCard();
+
+            String term = "";
+            while (term.isBlank()) {
+                term = promptForString("New Term: ");
+            }
+            flashCard.setTerm(term);
+
+            String definition = "";
+            while (definition.isBlank()) {
+                definition = promptForString("Definition: ");
+            }
+            flashCard.setDefinition(definition);
+
+            return flashCard;
+        }
+
     private void promptUserToContinue() {
         System.out.println("Press enter to continue...");
         userInput.nextLine();
